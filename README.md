@@ -1,6 +1,5 @@
 # 🖧 CCNA Layer 2 VLAN Simulator
 
-![Project Preview](https://via.placeholder.com/1000x400/2c3e50/ffffff?text=VLAN+Simulator+-+Preview)
 
 [![Live Demo](https://img.shields.io/badge/Live-Demo-2ecc71?style=for-the-badge&logo=github)](https://fe-katopesla.github.io/ccna-vlan-simulator/)
 [![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)]()
