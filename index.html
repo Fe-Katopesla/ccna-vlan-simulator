@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de VLANs (Layer 2) - CCNA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #f0f3f8;
+            --card-bg: #ffffff;
+            --border: #d1d8e0;
+            --terminal-bg: #1e1e1e;
+            
+            /* Cores das VLANs */
+            --vlan10: #3498db; /* Vendas - Azul */
+            --vlan20: #e74c3c; /* RH - Vermelho */
+            --vlan30: #2ecc71; /* TI - Verde */
+            --vlan40: #9b59b6; /* Financeiro - Roxo */
+        }
+
+        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-color); margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+
+        /* Cabeçalho */
+        .header { background: #2c3e50; color: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .header h2 { margin: 0; font-size: 26px; }
+        .header p { margin: 5px 0 0; opacity: 0.8; }
+
+        /* Layout Principal */
+        .main-layout { display: flex; gap: 20px; flex-wrap: wrap; }
+        .panel { background: var(--card-bg); padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid var(--border); }
+        
+        /* Área de Rede */
+        .network-area { flex: 2; position: relative; min-height: 550px; background: radial-gradient(circle, #f8f9fa 20%, transparent 20%); background-size: 20px 20px; display: flex; align-items: center; justify-content: center; }
+        
+        .cables line { stroke: #bdc3c7; stroke-width: 2; stroke-dasharray: 4, 4; }
+        .cables { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+
+        /* Estilo dos Nós (Switch e PCs) */
+        .node { position: absolute; display: flex; flex-direction: column; align-items: center; font-size: 12px; font-weight: 500; z-index: 10; transition: all 0.3s ease; }
+        .icon { width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 5px; border: 3px solid #ccc; background: white; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .node span { background: rgba(255,255,255,0.9); padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd; text-align: center; }
+        
+        #switch { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        #switch .icon { background: #34495e; color: white; border-color: #2c3e50; width: 70px; height: 70px; font-size: 30px; }
+
+        /* Posicionamento dos 8 PCs */
+        #pc1 { top: 50px; left: 10%; }
+        #pc2 { top: 200px; left: 5%; }
+        #pc3 { bottom: 200px; left: 5%; }
+        #pc4 { bottom: 50px; left: 10%; }
+        #pc5 { top: 50px; right: 10%; }
+        #pc6 { top: 200px; right: 5%; }
+        #pc7 { bottom: 200px; right: 5%; }
+        #pc8 { bottom: 50px; right: 10%; }
+
+        /* Classes Dinâmicas de Cores das VLANs */
+        .vlan-10 .icon { border-color: var(--vlan10); color: var(--vlan10); background: rgba(52, 152, 219, 0.1); }
+        .vlan-20 .icon { border-color: var(--vlan20); color: var(--vlan20); background: rgba(231, 76, 60, 0.1); }
+        .vlan-30 .icon { border-color: var(--vlan30); color: var(--vlan30); background: rgba(46, 204, 113, 0.1); }
+        .vlan-40 .icon { border-color: var(--vlan40); color: var(--vlan40); background: rgba(155, 89, 182, 0.1); }
+        
+        .vlan-badge { display: block; font-family: 'Fira Code', monospace; font-size: 11px; font-weight: bold; margin-top: 3px;}
+        .vlan-10 .vlan-badge { color: var(--vlan10); }
+        .vlan-20 .vlan-badge { color: var(--vlan20); }
+        .vlan-30 .vlan-badge { color: var(--vlan30); }
+        .vlan-40 .vlan-badge { color: var(--vlan40); }
+
+        /* Animação do Pacote (Broadcast) */
+        .packet { position: absolute; width: 20px; height: 20px; border-radius: 50%; opacity: 0; transition: all 0.8s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 5; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        
+        /* Painel Lateral (Controles e Logs) */
+        .sidebar { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 20px; }
+        
+        .control-group { margin-bottom: 15px; }
+        label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #2c3e50; }
+        select, button { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-family: inherit; font-size: 14px; box-sizing: border-box; }
+        button { background: #f39c12; color: white; border: none; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        button:hover { background: #d68910; }
+
+        /* Tabela de Configuração de VLANs */
+        table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
+        th, td { padding: 8px; border-bottom: 1px solid #eee; }
+        td select { width: 100%; padding: 4px; font-size: 12px; }
+
+        /* Console de Logs */
+        .log-box { flex-grow: 1; background: var(--terminal-bg); color: #d4d4d4; font-family: 'Fira Code', monospace; padding: 15px; font-size: 12px; border-radius: 6px; overflow-y: auto; height: 250px; }
+        .log-box p { margin: 5px 0; }
+        .log-info { color: #569cd6; }
+        .log-action { color: #ce9178; }
+        .log-block { color: #f44747; }
+        .log-success { color: #4ec9b0; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2><i class="fa-solid fa-layer-group"></i> Simulador de VLANs (Virtual LAN)</h2>
+        <p>Demonstração de Isolamento de Domínio de Broadcast (Camada 2)</p>
+    </div>
+
+    <div class="main-layout">
+        <div class="panel network-area" id="network">
+            <svg class="cables">
+                <line x1="12%" y1="12%" x2="50%" y2="50%" />
+                <line x1="7%" y1="40%" x2="50%" y2="50%" />
+                <line x1="7%" y1="60%" x2="50%" y2="50%" />
+                <line x1="12%" y1="88%" x2="50%" y2="50%" />
+                <line x1="88%" y1="12%" x2="50%" y2="50%" />
+                <line x1="93%" y1="40%" x2="50%" y2="50%" />
+                <line x1="93%" y1="60%" x2="50%" y2="50%" />
+                <line x1="88%" y1="88%" x2="50%" y2="50%" />
+            </svg>
+
+            <div class="node" id="switch">
+                <div class="icon"><i class="fa-solid fa-server"></i></div>
+                <span>Switch L2</span>
+            </div>
+            
+            </div>
+
+        <div class="sidebar">
+            <div class="panel">
+                <h3><i class="fa-solid fa-satellite-dish"></i> Enviar Broadcast</h3>
+                <div class="control-group">
+                    <label>Origem do Grito (Sender):</label>
+                    <select id="sender-select">
+                        <option value="1">PC 1 (Fa0/1)</option>
+                        <option value="2">PC 2 (Fa0/2)</option>
+                        <option value="3">PC 3 (Fa0/3)</option>
+                        <option value="4">PC 4 (Fa0/4)</option>
+                        <option value="5">PC 5 (Fa0/5)</option>
+                        <option value="6">PC 6 (Fa0/6)</option>
+                        <option value="7">PC 7 (Fa0/7)</option>
+                        <option value="8">PC 8 (Fa0/8)</option>
+                    </select>
+                </div>
+                <button onclick="sendBroadcast()"><i class="fa-solid fa-bullhorn"></i> Simular Inundação (Flooding)</button>
+            </div>
+
+            <div class="panel">
+                <h3><i class="fa-solid fa-sliders"></i> Configuração de Portas</h3>
+                <table>
+                    <thead>
+                        <tr><th>Porta</th><th>Atribuição de VLAN</th></tr>
+                    </thead>
+                    <tbody id="vlan-config-table">
+                        </tbody>
+                </table>
+            </div>
+
+            <div class="panel" style="display: flex; flex-direction: column; flex-grow: 1;">
+                <h3><i class="fa-solid fa-terminal"></i> Console do Switch</h3>
+                <div class="log-box" id="log-box"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Dicionário de VLANs (As cores estão mapeadas no CSS)
+    const vlanData = {
+        '10': { name: 'VLAN 10 (Vendas)', color: '#3498db' },
+        '20': { name: 'VLAN 20 (RH)', color: '#e74c3c' },
+        '30': { name: 'VLAN 30 (TI)', color: '#2ecc71' },
+        '40': { name: 'VLAN 40 (Financeiro)', color: '#9b59b6' }
+    };
+
+    // Estado inicial dos 8 Computadores
+    const pcs = [
+        { id: 1, port: 'Fa0/1', vlan: '10' },
+        { id: 2, port: 'Fa0/2', vlan: '10' },
+        { id: 3, port: 'Fa0/3', vlan: '20' },
+        { id: 4, port: 'Fa0/4', vlan: '20' },
+        { id: 5, port: 'Fa0/5', vlan: '30' },
+        { id: 6, port: 'Fa0/6', vlan: '30' },
+        { id: 7, port: 'Fa0/7', vlan: '40' },
+        { id: 8, port: 'Fa0/8', vlan: '40' }
+    ];
+
+    let isAnimating = false;
+
+    function log(msg, type = 'log-info') {
+        const box = document.getElementById('log-box');
+        box.innerHTML += `<p class="${type}">> ${msg}</p>`;
+        box.scrollTop = box.scrollHeight;
+    }
+
+    // Inicialização da Interface
+    function initUI() {
+        const network = document.getElementById('network');
+        const configTable = document.getElementById('vlan-config-table');
+
+        pcs.forEach(pc => {
+            // 1. Criar os PCs na área de rede
+            const pcDiv = document.createElement('div');
+            pcDiv.className = `node vlan-${pc.vlan}`;
+            pcDiv.id = `pc${pc.id}`;
+            pcDiv.innerHTML = `
+                <div class="icon"><i class="fa-solid fa-desktop"></i></div>
+                <span>PC ${pc.id}<br>${pc.port}<br><div class="vlan-badge" id="badge-${pc.id}">${vlanData[pc.vlan].name}</div></span>
+            `;
+            network.appendChild(pcDiv);
+            pc.el = pcDiv; // Guarda referência do DOM
+
+            // 2. Popular a tabela de configuração
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>PC ${pc.id} (${pc.port})</td>
+                <td>
+                    <select onchange="changeVlan(${pc.id}, this.value)">
+                        <option value="10" ${pc.vlan === '10' ? 'selected' : ''}>VLAN 10 (Vendas)</option>
+                        <option value="20" ${pc.vlan === '20' ? 'selected' : ''}>VLAN 20 (RH)</option>
+                        <option value="30" ${pc.vlan === '30' ? 'selected' : ''}>VLAN 30 (TI)</option>
+                        <option value="40" ${pc.vlan === '40' ? 'selected' : ''}>VLAN 40 (Finanças)</option>
+                    </select>
+                </td>
+            `;
+            configTable.appendChild(tr);
+        });
+
+        log("Switch inicializado. Interfaces designadas para suas respectivas VLANs.", "log-success");
+    }
+
+    // Função para alterar a VLAN dinamicamente
+    function changeVlan(pcId, newVlan) {
+        const pc = pcs.find(p => p.id === pcId);
+        const oldVlan = pc.vlan;
+        pc.vlan = newVlan;
+
+        // Atualizar CSS da bolha de rede
+        pc.el.className = `node vlan-${newVlan}`;
+        document.getElementById(`badge-${pcId}`).innerText = vlanData[newVlan].name;
+
+        log(`Administrador moveu a porta ${pc.port} da VLAN ${oldVlan} para a ${vlanData[newVlan].name}.`, "log-action");
+    }
+
+    // Função Principal de Simulação
+    async function sendBroadcast() {
+        if (isAnimating) return;
+        isAnimating = true;
+
+        const senderId = parseInt(document.getElementById('sender-select').value);
+        const sender = pcs.find(p => p.id === senderId);
+        const switchEl = document.getElementById('switch');
+        const packetColor = vlanData[sender.vlan].color;
+
+        log(`\n--- INICIANDO TRANSMISSÃO DE BROADCAST ---`, "log-info");
+        log(`[Host] PC ${sender.id} enviou um quadro de Broadcast (Destino FF:FF:FF:FF:FF:FF).`, "log-info");
+
+        // 1. Anima do PC origem para o Switch
+        await animatePacket(sender.el, switchEl, packetColor, 'fa-arrow-up');
+
+        // 2. Lógica do Switch (Isolamento)
+        log(`[Switch] Quadro recebido na porta ${sender.port}. A porta pertence à ${vlanData[sender.vlan].name}.`, "log-success");
+        log(`[Switch] REGRA L2: Inundando portas (Flooding) SOMENTE dentro da VLAN ${sender.vlan}...`, "log-action");
+
+        const floodAnimations = [];
+        await new Promise(r => setTimeout(r, 500)); // Pequena pausa dramática
+
+        pcs.forEach(pc => {
+            if (pc.id === sender.id) return; // Não devolve para quem enviou
+
+            if (pc.vlan === sender.vlan) {
+                // Mesma VLAN -> Encaminha
+                log(`[Switch] Encaminhando cópia para ${pc.port} (PC ${pc.id}) -> VLAN confere.`, "log-success");
+                floodAnimations.push(animatePacket(switchEl, pc.el, packetColor, 'fa-arrow-down'));
+            } else {
+                // VLAN Diferente -> Bloqueia (Isolamento)
+                log(`[Switch] BLOQUEADO para ${pc.port} (PC ${pc.id}) -> Pertence à VLAN ${pc.vlan}.`, "log-block");
+            }
+        });
+
+        await Promise.all(floodAnimations);
+        log(`--- ISOLAMENTO CONCLUÍDO ---`, "log-info");
+        isAnimating = false;
+    }
+
+    function animatePacket(startEl, endEl, color, iconClass) {
+        return new Promise(resolve => {
+            const network = document.getElementById('network');
+            const packet = document.createElement('div');
+            packet.className = 'packet';
+            packet.style.background = color;
+            packet.innerHTML = `<i class="fa-solid ${iconClass}"></i>`;
+            network.appendChild(packet);
+
+            const startRect = startEl.getBoundingClientRect();
+            const endRect = endEl.getBoundingClientRect();
+            const netRect = network.getBoundingClientRect();
+
+            const startX = startRect.left - netRect.left + (startRect.width / 2) - 10;
+            const startY = startRect.top - netRect.top + (startRect.height / 2) - 20;
+            const endX = endRect.left - netRect.left + (endRect.width / 2) - 10;
+            const endY = endRect.top - netRect.top + (endRect.height / 2) - 20;
+
+            packet.style.left = `${startX}px`;
+            packet.style.top = `${startY}px`;
+            
+            // Reflow
+            packet.getBoundingClientRect(); 
+
+            packet.style.opacity = '1';
+            packet.style.left = `${endX}px`;
+            packet.style.top = `${endY}px`;
+
+            setTimeout(() => {
+                packet.style.opacity = '0';
+                setTimeout(() => packet.remove(), 300);
+                resolve();
+            }, 800);
+        });
+    }
+
+    window.onload = initUI;
+</script>
+
+</body>
+</html>
