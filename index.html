@@ -8,37 +8,44 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg-color: #f0f3f8;
-            --card-bg: #ffffff;
-            --border: #d1d8e0;
-            --terminal-bg: #1e1e1e;
-            --vlan10: #3498db;
-            --vlan20: #e74c3c;
-            --vlan30: #2ecc71;
-            --vlan40: #9b59b6;
+            /* Cyberpunk / Neon Theme Colors */
+            --bg-color: #050505;
+            --card-bg: #111111;
+            --border: #333333;
+            --terminal-bg: #000000;
+            --text-color: #e0e0e0;
+            --neon-primary: #df4dff;
+            --neon-secondary: #b026ff;
+            
+            /* Neon VLAN Colors */
+            --vlan10: #00d2ff; /* Neon Blue */
+            --vlan20: #ff3333; /* Neon Red */
+            --vlan30: #00ff66; /* Neon Green */
+            --vlan40: #df4dff; /* Neon Purple */
         }
 
-        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-color); margin: 0; padding: 20px; color: #333; }
+        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-color); margin: 0; padding: 20px; color: var(--text-color); }
         .container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
 
-        .header { background: #2c3e50; color: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .header h2 { margin: 0; font-size: 26px; }
+        .header { background: var(--card-bg); color: white; padding: 20px; border-radius: 10px; text-align: center; border: 1px solid var(--neon-secondary); box-shadow: 0 0 15px rgba(176, 38, 255, 0.2); }
+        .header h2 { margin: 0; font-size: 26px; color: var(--neon-primary); text-shadow: 0 0 5px var(--neon-primary), 0 0 10px var(--neon-secondary); }
         .header p { margin: 5px 0 0; opacity: 0.8; }
 
         .main-layout { display: flex; gap: 20px; flex-wrap: wrap; }
-        .panel { background: var(--card-bg); padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid var(--border); }
+        .panel { background: var(--card-bg); padding: 20px; border-radius: 10px; border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .panel h3 { color: var(--neon-primary); margin-top: 0; border-bottom: 1px solid var(--border); padding-bottom: 10px; text-shadow: 0 0 2px var(--neon-primary); }
         
-        .network-area { flex: 2; position: relative; min-height: 550px; background: radial-gradient(circle, #f8f9fa 20%, transparent 20%); background-size: 20px 20px; display: flex; align-items: center; justify-content: center; }
+        .network-area { flex: 2; position: relative; min-height: 550px; background-color: #0a0a0a; background-image: radial-gradient(circle, #222 20%, transparent 20%); background-size: 20px 20px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); box-shadow: inset 0 0 30px rgba(0,0,0,0.8); }
         
-        .cables line { stroke: #bdc3c7; stroke-width: 2; stroke-dasharray: 4, 4; }
+        .cables line { stroke: #333; stroke-width: 2; stroke-dasharray: 4, 4; }
         .cables { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
 
         .node { position: absolute; display: flex; flex-direction: column; align-items: center; font-size: 12px; font-weight: 500; z-index: 10; transition: all 0.3s ease; }
-        .icon { width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 5px; border: 3px solid #ccc; background: white; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .node span { background: rgba(255,255,255,0.9); padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd; text-align: center; }
+        .icon { width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 5px; border: 2px solid #555; background: #000; color: white; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.5); }
+        .node span { background: rgba(0,0,0,0.8); padding: 4px 8px; border-radius: 4px; border: 1px solid #333; text-align: center; color: #ddd; }
         
         #switch { top: 50%; left: 50%; transform: translate(-50%, -50%); }
-        #switch .icon { background: #34495e; color: white; border-color: #2c3e50; width: 70px; height: 70px; font-size: 30px; }
+        #switch .icon { background: #111; color: var(--neon-primary); border-color: var(--neon-secondary); width: 70px; height: 70px; font-size: 30px; box-shadow: 0 0 15px rgba(176, 38, 255, 0.4); }
 
         #pc1 { top: 50px; left: 10%; }
         #pc2 { top: 200px; left: 5%; }
@@ -49,37 +56,39 @@
         #pc7 { bottom: 200px; right: 5%; }
         #pc8 { bottom: 50px; right: 10%; }
 
-        .vlan-10 .icon { border-color: var(--vlan10); color: var(--vlan10); background: rgba(52, 152, 219, 0.1); }
-        .vlan-20 .icon { border-color: var(--vlan20); color: var(--vlan20); background: rgba(231, 76, 60, 0.1); }
-        .vlan-30 .icon { border-color: var(--vlan30); color: var(--vlan30); background: rgba(46, 204, 113, 0.1); }
-        .vlan-40 .icon { border-color: var(--vlan40); color: var(--vlan40); background: rgba(155, 89, 182, 0.1); }
+        /* Neon Glow Effects for VLANs */
+        .vlan-10 .icon { border-color: var(--vlan10); color: var(--vlan10); box-shadow: 0 0 10px var(--vlan10); }
+        .vlan-20 .icon { border-color: var(--vlan20); color: var(--vlan20); box-shadow: 0 0 10px var(--vlan20); }
+        .vlan-30 .icon { border-color: var(--vlan30); color: var(--vlan30); box-shadow: 0 0 10px var(--vlan30); }
+        .vlan-40 .icon { border-color: var(--vlan40); color: var(--vlan40); box-shadow: 0 0 10px var(--vlan40); }
         
-        .vlan-badge { display: block; font-family: 'Fira Code', monospace; font-size: 11px; font-weight: bold; margin-top: 3px;}
+        .vlan-badge { display: block; font-family: 'Fira Code', monospace; font-size: 11px; font-weight: bold; margin-top: 3px; text-shadow: 0 0 3px currentColor;}
         .vlan-10 .vlan-badge { color: var(--vlan10); }
         .vlan-20 .vlan-badge { color: var(--vlan20); }
         .vlan-30 .vlan-badge { color: var(--vlan30); }
         .vlan-40 .vlan-badge { color: var(--vlan40); }
 
-        .packet { position: absolute; width: 20px; height: 20px; border-radius: 50%; opacity: 0; transition: all 0.8s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 5; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        .packet { position: absolute; width: 20px; height: 20px; border-radius: 50%; opacity: 0; transition: all 0.8s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 5; display: flex; align-items: center; justify-content: center; color: #000; font-size: 10px; box-shadow: 0 0 15px currentColor; }
         
         .sidebar { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 20px; }
         
         .control-group { margin-bottom: 15px; }
-        label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #2c3e50; }
-        select, button { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-family: inherit; font-size: 14px; box-sizing: border-box; }
-        button { background: #f39c12; color: white; border: none; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; }
-        button:hover { background: #d68910; }
+        label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #aaa; }
+        select, button { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #444; font-family: inherit; font-size: 14px; box-sizing: border-box; background: #222; color: #eee; outline: none; }
+        button { background: transparent; color: var(--neon-primary); border: 1px solid var(--neon-primary); cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: inset 0 0 5px rgba(223, 77, 255, 0.2); }
+        button:hover { background: var(--neon-primary); color: #000; box-shadow: 0 0 15px var(--neon-primary); }
 
         table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
-        th, td { padding: 8px; border-bottom: 1px solid #eee; }
-        td select { width: 100%; padding: 4px; font-size: 12px; }
+        th, td { padding: 8px; border-bottom: 1px solid #222; color: #ccc; }
+        th { color: #888; }
+        td select { width: 100%; padding: 4px; font-size: 12px; background: #111; color: #fff; border: 1px solid #333; }
 
-        .log-box { flex-grow: 1; background: var(--terminal-bg); color: #d4d4d4; font-family: 'Fira Code', monospace; padding: 15px; font-size: 12px; border-radius: 6px; overflow-y: auto; height: 250px; }
+        .log-box { flex-grow: 1; background: var(--terminal-bg); color: #d4d4d4; font-family: 'Fira Code', monospace; padding: 15px; font-size: 12px; border-radius: 6px; overflow-y: auto; height: 250px; border: 1px solid #333; }
         .log-box p { margin: 5px 0; }
         .log-info { color: #569cd6; }
         .log-action { color: #ce9178; }
-        .log-block { color: #f44747; }
-        .log-success { color: #4ec9b0; }
+        .log-block { color: #f44747; text-shadow: 0 0 2px #f44747;}
+        .log-success { color: #4ec9b0; text-shadow: 0 0 2px #4ec9b0;}
     </style>
 </head>
 <body>
@@ -149,10 +158,10 @@
 
 <script>
     const vlanData = {
-        '10': { name: 'VLAN 10 (Sales)', color: '#3498db' },
-        '20': { name: 'VLAN 20 (HR)', color: '#e74c3c' },
-        '30': { name: 'VLAN 30 (IT)', color: '#2ecc71' },
-        '40': { name: 'VLAN 40 (Finance)', color: '#9b59b6' }
+        '10': { name: 'VLAN 10 (Sales)', color: '#00d2ff' },
+        '20': { name: 'VLAN 20 (HR)', color: '#ff3333' },
+        '30': { name: 'VLAN 30 (IT)', color: '#00ff66' },
+        '40': { name: 'VLAN 40 (Finance)', color: '#df4dff' }
     };
 
     const pcs = [
@@ -260,6 +269,7 @@
             const packet = document.createElement('div');
             packet.className = 'packet';
             packet.style.background = color;
+            packet.style.color = '#000';
             packet.innerHTML = `<i class="fa-solid ${iconClass}"></i>`;
             network.appendChild(packet);
 
