@@ -1,0 +1,47 @@
+---
+---
+@import "{{ site.theme }}";
+
+/* --- CUSTOMIZAÇÃO NEON ROXO E PRETO --- */
+
+body {
+    background-color: #050505;
+    color: #e0e0e0;
+}
+
+.wrapper {
+    background: transparent;
+}
+
+/* Títulos com efeito Neon Roxo */
+h1, h2, h3, h4, h5, h6 {
+    color: #df4dff;
+    text-shadow: 
+        0 0 5px #df4dff, 
+        0 0 10px #df4dff, 
+        0 0 20px #b026ff, 
+        0 0 40px #b026ff;
+    letter-spacing: 1px;
+}
+
+/* Links em roxo neon */
+a {
+    color: #b026ff;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+a:hover {
+    color: #ffffff;
+    text-shadow: 
+        0 0 5px #df4dff, 
+        0 0 15px #df4dff;
+}
+
+/* Blocos de código estilo hacker */
+pre, code {
+    background-color: #111111;
+    border: 1px solid #b026ff;
+    color: #d1d1d1;
+    border-radius: 5px;
+}
